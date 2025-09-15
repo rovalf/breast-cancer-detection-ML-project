@@ -1,0 +1,21 @@
+# =============================================================================
+# Core Web App
+# =============================================================================
+Flask==2.3.3           # Web framework (routes, sessions, templates)
+Pillow==10.0.0         # Image handling (JPG/PNG conversions, resizing)
+pydicom==2.4.3         # Read mammogram DICOM images
+opencv-python==4.8.1.78 # OpenCV for Grad-CAM overlays (heatmaps)
+
+# =============================================================================
+# Deep Learning
+# =============================================================================
+tensorflow==2.13.0     # TensorFlow + Keras (EfficientNet, CNNs)
+numpy==1.24.3          # Array operations, preprocessing
+
+# =============================================================================
+# Evaluation & Experimentation (optional, not required for web app)
+# =============================================================================
+scikit-learn==1.3.0    # Metrics (classification report, confusion matrix)
+matplotlib==3.7.2      # Plotting training curves, confusion matrices
+pandas==2.0.3          # Data manipulation, fold results logging
+jupyter==1.0.0         # Jupyter notebook support (if running experiments)
