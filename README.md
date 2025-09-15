@@ -45,20 +45,20 @@ The system integrates:
    cd breast-cancer-detection-ML-project
 
 2. Create and activate a virtual environment (recommended):
-
-python -m venv venv
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Linux/Mac
+   venv\Scripts\activate      # Windows
 
 
 3. Install dependencies:
-
-pip install -r requirements.txt
+    ```bash
+   pip install -r requirements.txt
 
 
 4. Run the application:
-
-python app.py
+    ```bash
+   python app.py
 
 
 5. Access the web interface at:
