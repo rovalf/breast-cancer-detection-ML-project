@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Breast Cancer Detection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Breast Cancer Detection Web App</h1>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+  </div>
+
+  <!-- Nav Tabs -->
+  <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button" role="tab">Predict</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="convert-tab" data-bs-toggle="tab" data-bs-target="#convert" type="button" role="tab">Convert DICOM</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="evaluation-tab" data-bs-toggle="tab" data-bs-target="#evaluation" type="button" role="tab">Evaluation</button>
+    </li>
+  </ul>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="myTabContent">
+
+    <!-- Predict Tab (stub) -->
+    <div class="tab-pane fade show active" id="predict" role="tabpanel">
+      <h4>Upload Image for Prediction</h4>
+      <form id="predict-form" enctype="multipart/form-data">
+        <input type="file" name="file" class="form-control mb-3" accept="image/*" required />
+        <button type="submit" class="btn btn-primary">Predict</button>
+      </form>
+      <div id="prediction-result" class="mt-3"></div>
+    </div>
+
+    <div class="tab-pane fade" id="convert">
+  <h5 class="mb-3">Convert DICOM to PNG</h5>
+
+  <form id="convertForm" onsubmit="return false;">
+    <div class="mb-3">
+      <input class="form-control" type="file" id="dicomFile" name="dicom_file" accept=".dcm" required>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="button" id="btnConvert" class="btn btn-primary">Convert (Preview)</button>
+      <a id="btnDownload" class="btn btn-secondary disabled" aria-disabled="true">Download PNG</a>
+    </div>
+  </form>
+
+  <div id="previewWrap" class="mt-3" style="display:none;">
+    <p class="text-muted mb-2">Preview</p>
+    <img id="previewImg" class="img-fluid border rounded" style="max-height:380px;" alt="Converted preview">
+  </div>
+</div>
+
+<script>
+(() => {
+  const fileInput    = document.getElementById('dicomFile');
+  const btnConvert   = document.getElementById('btnConvert');
+  const btnDownload  = document.getElementById('btnDownload');
+  const previewWrap  = document.getElementById('previewWrap');
+  const previewImg   = document.getElementById('previewImg');
+
+  btnConvert.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) { alert('Please choose a DICOM file first.'); return; }
+
+    const fd = new FormData();
+    fd.append('dicom_file', file);
+
+    btnConvert.disabled = true;
+    btnConvert.textContent = 'Converting…';
+
+    try {
+      const res  = await fetch('/convert_preview', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Conversion failed');
+
+      // Show preview and enable download
+      previewImg.src = data.preview_url + '?t=' + Date.now(); // bust cache
+      previewWrap.style.display = 'block';
+      btnDownload.href = data.download_url;
+      btnDownload.classList.remove('disabled');
+      btnDownload.removeAttribute('aria-disabled');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      btnConvert.disabled = false;
+      btnConvert.textContent = 'Convert (Preview)';
+    }
+  });
+
+  // prevent click when disabled
+  btnDownload.addEventListener('click', (e) => {
+    if (btnDownload.classList.contains('disabled')) e.preventDefault();
+  });
+})();
+</script>
+
+
+    <!-- Evaluation Tab -->
+    <div class="tab-pane fade" id="evaluation" role="tabpanel">
+      <h4>Model Evaluation</h4>
+      <p><a href="{{ url_for('evaluation') }}" class="btn btn-info">Go to Evaluation Page</a></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.getElementById("predict-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const res = await fetch("/predict", { method: "POST", body: data });
+
+      let result;
+      try { result = await res.json(); } catch { result = { error: "Unexpected response." }; }
+
+      if (!res.ok || result.error) {
+        document.getElementById("prediction-result").innerHTML =
+          `<div class="alert alert-warning">${result.error || "Prediction failed."}</div>`;
+        return;
+      }
+
+      document.getElementById("prediction-result").innerHTML = `
+        <h5>Prediction:
+          <span class="badge bg-${result.prediction === 'Malignant' ? 'danger' : 'success'}">
+            ${result.prediction}
+          </span>
+        </h5>
+        <p>Confidence: ${result.confidence}</p>
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Uploaded Image:</h6>
+            <img src="${result.image_path}?${Date.now()}" class="img-fluid mb-3" />
+          </div>
+          <div class="col-md-6">
+            <h6>Grad-CAM Output:</h6>
+            <img src="${result.gradcam_image}?${Date.now()}" class="img-fluid mb-3" />
+          </div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Model Evaluation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    img { max-width: 500px; margin-bottom: 20px; border: 1px solid #ddd; }
+    pre { background: #f7f7f7; padding: 10px; border: 1px solid #ddd; }
+    a { display: inline-block; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Model Training and Evaluation Results</h2>
+
+  <h3>Training Accuracy & Loss</h3>
+  <img src="/static/acc_roc_per_fold.png" alt="Training Plot" />
+
+  <h3>Confusion Matrix</h3>
+  <img src="/static/confusion_matrix_fold2_recall85.png" alt="Confusion Matrix" />
+
+  <h3>Model vs BCSC Benchmark</h3>
+  <img src="/static/benchmark_comparison.png" alt="Benchmark Comparison" />
+
+  <a href="{{ url_for('dashboard') }}">⬅ Back to Dashboard</a>
+</body>
+</html>
